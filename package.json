@@ -1,0 +1,19 @@
+{
+  "name": "healthbeacon",
+  "main": "index.js",
+  "scripts": {
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/antoligy/healthbeacon.git"
+  },
+  "keywords": [
+    "health"
+  ],
+  "author": "Alex Wilson <a@ax.gy>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/antoligy/healthbeacon/issues"
+  },
+  "homepage": "https://github.com/antoligy/healthbeacon#readme"
+}
