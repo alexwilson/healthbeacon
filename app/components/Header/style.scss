@@ -1,0 +1,29 @@
+.header {
+  display: block;
+  background: #ccc;
+}
+
+.nav {
+  &__list {
+    list-style: none;
+
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: flex-start;
+    align-content: flex-start;
+
+    &__item {
+      padding: 10px;
+      flex: 1;
+
+      a {
+        color: #656565;
+        text-decoration: none;
+        &:hover {
+          color: #222;
+        }
+      }
+    }
+  }
+}
