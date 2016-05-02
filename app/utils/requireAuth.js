@@ -2,7 +2,7 @@ import AuthStore from '../stores/AuthStore';
 
 const requireAuth = (nextState, replace) => {
 
-  if (!AuthStore.loggedIn()) {
+  if (!AuthStore.isAuthenticated()) {
     replace({
       pathname: '/login',
       state: { nextPathname: nextState.location.pathname }
