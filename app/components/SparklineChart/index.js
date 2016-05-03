@@ -10,25 +10,24 @@ class SparklineChart extends React.Component {
       const width = 960 - margin.left - margin.right
       const height = 500 - margin.top - margin.bottom
 
-      const data = Object.keys(this.props.data).map(function(key) {
-        let dataset = this.props.data[key];
-
-        let val = 0;
-        if (dataset.length > 0) {
-          let dataVal = dataset.shift().value;
-          if (dataVal && dataVal.length > 0) {
-            val = dataVal.shift().fpVal;
-          }
-        }
-
-        return {
-          value: val,
-          date: new Date(+key)
-        }
-      }.bind(this));
+      const data = [].concat.apply([], Object.keys(this.props.data).map((key) => {
+        const returnables = [];
+        const date = new Date(+key);
+          const dataset = this.props.data[key];
+          return [].concat.apply([],
+            Object.keys(dataset).map((key) => (
+              [].concat.apply([],
+                dataset[key].value.map((value) => ({
+                  value: (value.fpVal) ? value.fpVal : 0,
+                  date: date
+                })
+              ))
+            ))
+          );
+      }));
 
       const x = d3.time.scale()
-        .domain(d3.extent(data, (d) => (d.date.getTime())))
+        .domain(d3.extent(data, (d) => (d.date)))
         .range([0, width]);
 
       const y = d3.scale.linear()
@@ -50,7 +49,7 @@ class SparklineChart extends React.Component {
       const line = d3.svg.line()
         .x((d) => (x(d.date)))
         .y((d) => (y(d.value)))
-        .interpolate("basis");
+        .interpolate("bundle");
 
       const node = ReactFauxDOM.createElement('svg')
       const svg = d3.select(node)
@@ -76,12 +75,9 @@ class SparklineChart extends React.Component {
         .text(`${this.props.name}`);
 
       svg.append('path')
-        .datum(data)
+        // .datum(data)
         .attr('class', styles.chart__line)
-        // .attr('d', (d) => ( line(d) + "Z" ))
-        .attr('d', line)
-
-      console.log(node.getElementsByTagName('line'));
+        .attr('d', line(data));
 
       return node.toReact();
   }
