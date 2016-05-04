@@ -8,6 +8,11 @@ const FitnessStore = Reflux.createStore({
 
   state: {},
 
+  fields: {
+    "distance": "com.google.distance.delta",
+    "weight": "com.google.weight"
+  },
+
   /**
    * @return {void}
    */
@@ -26,7 +31,10 @@ const FitnessStore = Reflux.createStore({
     if (e !== 'tokenChanged') {
       return;
     }
-    let date = new Date();
+    const date = new Date();
+    const aggregateBy = Object.keys(this.fields).map((key) => ({
+        "dataTypeName": this.fields[key]
+      }));
     fetch('https://www.googleapis.com/fitness/v1/users/me/dataset:aggregate', {
       method: 'POST',
       credentials: 'same-origin',
@@ -38,11 +46,7 @@ const FitnessStore = Reflux.createStore({
       body: JSON.stringify({
         "startTimeMillis": (date.getTime() - (28 * 24 * 60 * 60 * 1000)),
         "endTimeMillis": date.getTime(),
-        "aggregateBy": [{
-          "dataTypeName": "com.google.weight"
-        }, {
-          "dataTypeName": "com.google.distance.delta"
-        }],
+        "aggregateBy": aggregateBy,
         "bucketByTime": {
           "durationMillis": (24 * 60 * 60 * 1000)
         },
@@ -62,16 +66,9 @@ const FitnessStore = Reflux.createStore({
   },
 
   mapToHumanName(activityBucket) {
-    switch (activityBucket) {
-      case 'derived:com.google.distance.delta:com.google.android.gms:aggregated':
-        activityBucket = 'distance';
-        break;
-
-      case 'derived:com.google.weight.summary:com.google.android.gms:aggregated':
-        activityBucket = 'weight';
-        break;
-    }
-    return activityBucket;
+    return Object.keys(this.fields).reduce((previous, current) => {
+      return activityBucket.indexOf(this.fields[current]) !== -1 ? current : previous
+    }, activityBucket);
   },
 
   addPoint(timestamp, activityBucket, point) {
