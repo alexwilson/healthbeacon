@@ -79,16 +79,19 @@ const FitnessStore = Reflux.createStore({
     if (!this.state.buckets[activityBucket].hasOwnProperty(timestamp)) {
       this.state.buckets[activityBucket][timestamp] = [];
     }
-    this.state.buckets[activityBucket][timestamp].push(point);
+    if (this.state.buckets[activityBucket][timestamp].find((dataPoint) => (
+      point === dataPoint
+    )) === undefined) {
+      this.state.buckets[activityBucket][timestamp].push(point);
+    }
   },
 
   parseResponse(res) {
-    let self = this;
-    res.bucket.forEach(function(currentBucket) {
-      currentBucket.dataset.forEach(function(dataset) {
+    res.bucket.forEach((currentBucket) => {
+      currentBucket.dataset.forEach((dataset) => {
         if (dataset.hasOwnProperty('point')) {
-          dataset.point.forEach(function(datapoint) {
-            self.addPoint(
+          dataset.point.forEach((datapoint) => {
+            this.addPoint(
               currentBucket.startTimeMillis,
               dataset.dataSourceId,
               datapoint

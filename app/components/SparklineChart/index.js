@@ -13,18 +13,18 @@ class SparklineChart extends React.Component {
       const data = [].concat.apply([], Object.keys(this.props.data).map((key) => {
         const returnables = [];
         const date = new Date(+key);
-          const dataset = this.props.data[key];
-          return [].concat.apply([],
-            Object.keys(dataset).map((key) => (
-              [].concat.apply([],
-                dataset[key].value.map((value) => ({
-                  value: (value.fpVal) ? value.fpVal : 0,
-                  date: date
-                })
-              ))
+        const dataset = this.props.data[key];
+        return [].concat.apply([],
+          Object.keys(dataset).map((key) => (
+            [].concat.apply([],
+              dataset[key].value.map((value) => ({
+                value: (value.fpVal) ? value.fpVal : 0,
+                date: date
+              })
             ))
-          );
-      }));
+          ))
+        );
+      })).sort((a, b) => ( a.date.getTime() - b.date.getTime() ));
 
       const x = d3.time.scale()
         .domain(d3.extent(data, (d) => (d.date)))
@@ -75,9 +75,9 @@ class SparklineChart extends React.Component {
         .text(`${this.props.name}`);
 
       svg.append('path')
-        // .datum(data)
+        .datum(data)
         .attr('class', styles.chart__line)
-        .attr('d', line(data));
+        .attr('d', line);
 
       return node.toReact();
   }
