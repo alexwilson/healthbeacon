@@ -19,7 +19,7 @@ const FitnessStore = Reflux.createStore({
   init() {
     this.listenTo(AuthStore, this.fetchAggregate);
     this.state = {
-      buckets: []
+      buckets: {}
     };
   },
 
@@ -71,19 +71,21 @@ const FitnessStore = Reflux.createStore({
     }, activityBucket);
   },
 
-  addPoint(timestamp, activityBucket, point) {
+  addPoint(activityBucket, point) {
     activityBucket = this.mapToHumanName(activityBucket);
     if (!this.state.buckets.hasOwnProperty(activityBucket)) {
-      this.state.buckets[activityBucket] = {};
+      this.state.buckets[activityBucket] = [];
     }
-    if (!this.state.buckets[activityBucket].hasOwnProperty(timestamp)) {
-      this.state.buckets[activityBucket][timestamp] = [];
-    }
-    if (this.state.buckets[activityBucket][timestamp].find((dataPoint) => (
-      point === dataPoint
-    )) === undefined) {
-      this.state.buckets[activityBucket][timestamp].push(point);
-    }
+    point.value.map((value) => ({
+      value: (value.fpVal) ? value.fpVal.toFixed(3) : 0,
+      date: new Date((point.startTimeNanos/1000000))
+    })).map((datapoint) => {
+      if (this.state.buckets[activityBucket].find((point) => (
+        (point.date.toDateString() === datapoint.date.toDateString()) && (point.value === datapoint.value)
+      )) === undefined) {
+        this.state.buckets[activityBucket].push(datapoint)
+      }
+    });
   },
 
   parseResponse(res) {
@@ -92,7 +94,6 @@ const FitnessStore = Reflux.createStore({
         if (dataset.hasOwnProperty('point')) {
           dataset.point.forEach((datapoint) => {
             this.addPoint(
-              currentBucket.startTimeMillis,
               dataset.dataSourceId,
               datapoint
             );
