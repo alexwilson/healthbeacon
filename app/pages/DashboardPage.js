@@ -34,13 +34,14 @@ class DashboardPage extends React.Component {
       return (<span>Loading data...</span>);
     }
 
+
     return (
     <div>
       <DocumentTitle title='Dashboard - Healthbeacon' />
       <h1>Dashboard</h1>
-      {Object.keys(this.state.fitness.buckets).map(function(bucket) {
-        return <SparklineChart key={bucket} name={bucket} data={this.state.fitness.buckets[bucket]} />
-      }.bind(this))}
+      {Object.keys(this.state.fitness.buckets).map((bucket) =>
+        <SparklineChart key={bucket} name={bucket} data={this.state.fitness.buckets[bucket]} />
+      )}
     </div>
   )};
 

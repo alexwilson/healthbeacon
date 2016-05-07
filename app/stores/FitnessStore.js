@@ -3,6 +3,7 @@ import AuthStore from './AuthStore';
 import AuthActions from '../actions/AuthActions';
 import GoogleAuth from '../services/GoogleAuth';
 import fetch from 'isomorphic-fetch';
+import { BloomFilter } from 'bloomfilter';
 
 const FitnessStore = Reflux.createStore({
 
@@ -21,6 +22,7 @@ const FitnessStore = Reflux.createStore({
     this.state = {
       buckets: {}
     };
+    this.bloomFilter = new BloomFilter(32 * 256, 16);
   },
 
   getInitialState() {
@@ -31,10 +33,17 @@ const FitnessStore = Reflux.createStore({
     if (e !== 'tokenChanged') {
       return;
     }
-    const date = new Date();
+
+    const startTime = new Date();
+    startTime.setHours((-28 * 24), 0, 0, 0);
+
+    const endTime = new Date();
+    endTime.setHours(24, 0, 0, 0);
+
     const aggregateBy = Object.keys(this.fields).map((key) => ({
-        "dataTypeName": this.fields[key]
-      }));
+      "dataTypeName": this.fields[key]
+    }));
+
     fetch('https://www.googleapis.com/fitness/v1/users/me/dataset:aggregate', {
       method: 'POST',
       credentials: 'same-origin',
@@ -44,11 +53,16 @@ const FitnessStore = Reflux.createStore({
         'Authorization': `Bearer ${AuthStore.getToken()}`
       },
       body: JSON.stringify({
-        "startTimeMillis": (date.getTime() - (28 * 24 * 60 * 60 * 1000)),
-        "endTimeMillis": date.getTime(),
+        "startTimeMillis": startTime.getTime(),
+        "endTimeMillis": endTime.getTime(),
         "aggregateBy": aggregateBy,
         "bucketByTime": {
-          "durationMillis": (24 * 60 * 60 * 1000)
+          "durationMillis": (24 * 60 * 60 * 1000),
+          "period": {
+            "type": "day",
+            "value": 1,
+            "timeZoneId": "Europe/London"
+          }
         },
 
       })
@@ -57,6 +71,9 @@ const FitnessStore = Reflux.createStore({
       return res.json();
     })
     .then((res) => {
+      if (res.error) {
+        throw new Error(res.error.message);
+      }
       this.parseResponse(res);
       this.trigger(this.state);
     })
@@ -66,24 +83,26 @@ const FitnessStore = Reflux.createStore({
   },
 
   mapToHumanName(activityBucket) {
-    return Object.keys(this.fields).reduce((previous, current) => {
-      return activityBucket.indexOf(this.fields[current]) !== -1 ? current : previous
-    }, activityBucket);
+    return Object.keys(this.fields).reduce((previous, current) => (
+      activityBucket.indexOf(this.fields[current]) !== -1 ? current : previous
+    ), activityBucket);
   },
 
   addPoint(activityBucket, point) {
     activityBucket = this.mapToHumanName(activityBucket);
     if (!this.state.buckets.hasOwnProperty(activityBucket)) {
-      this.state.buckets[activityBucket] = [];
+      this.state.buckets[activityBucket] = new Set();
     }
-    point.value.map((value) => ({
-      value: (value.fpVal) ? value.fpVal.toFixed(3) : 0,
-      date: new Date((point.startTimeNanos/1000000))
-    })).map((datapoint) => {
-      if (this.state.buckets[activityBucket].find((point) => (
-        (point.date.toDateString() === datapoint.date.toDateString()) && (point.value === datapoint.value)
-      )) === undefined) {
-        this.state.buckets[activityBucket].push(datapoint)
+    point.value.forEach((value) => {
+      const date = new Date((point.startTimeNanos/1000000));
+      date.setHours(date.getHours(), 0, 0, 0)
+      const datapoint = {
+        value: (value.fpVal) ? +value.fpVal.toFixed(3) : 0,
+        date: date
+      };
+      if (!this.bloomFilter.test(JSON.stringify(datapoint))) {
+        this.state.buckets[activityBucket].add(datapoint);
+        this.bloomFilter.add(JSON.stringify(datapoint));
       }
     });
   },

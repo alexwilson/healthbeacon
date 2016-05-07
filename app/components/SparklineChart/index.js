@@ -10,14 +10,19 @@ class SparklineChart extends React.Component {
       const width = 960 - margin.left - margin.right
       const height = 500 - margin.top - margin.bottom
 
-      const data = this.props.data.sort((a, b) => ( a.date.getTime() - b.date.getTime() ));
+      const data = [...this.props.data]
+        .sort((a, b) => (a.date - b.date))
+        .map((datapoint) => {
+          datapoint.date = datapoint.date
+          return datapoint;
+        });
 
       const x = d3.time.scale()
-        .domain(d3.extent(data, (d) => (d.date)))
+        .domain(d3.extent(data, (d) => d.date))
         .range([0, width]);
 
       const y = d3.scale.linear()
-        .domain(d3.extent(data, (d) => (d.value)))
+        .domain(d3.extent(data, (d) => d.value))
         .range([height, 0]);
 
       const xAxis = d3.svg.axis()
@@ -33,8 +38,8 @@ class SparklineChart extends React.Component {
         .orient('left')
 
       const line = d3.svg.line()
-        .x((d) => (x(d.date)))
-        .y((d) => (y(d.value)))
+        .x((d) => x(d.date))
+        .y((d) => y(d.value))
         .interpolate("bundle");
 
       const node = ReactFauxDOM.createElement('svg')
