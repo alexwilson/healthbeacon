@@ -11,7 +11,7 @@ import Tile from 'grommet/components/Tile';
 import Tiles from 'grommet/components/Tiles';
 import LinkUp from 'grommet/components/icons/base/LinkUp';
 import LinkDown from 'grommet/components/icons/base/LinkDown';
-import More from 'grommet/components/icons/base/More';
+import More from 'grommet/components/icons/Status';
 
 class DashboardPage extends React.Component {
 
@@ -54,10 +54,10 @@ class DashboardPage extends React.Component {
         let currentWeight = bucket.pop();
         let previousWeight = bucket.pop();
         let trendIcon = (currentWeight.value === previousWeight.value) ? (
-          <More size="xlarge" colorIndex="warning" />
+          <Status value="warning" size="large" />
         ) : (
           (currentWeight.value < previousWeight.value) ?
-          <LinkDown size="xlarge" colorIndex="ok" /> : <LinkUp size="xlarge" colorIndex="error" />
+          <LinkDown size="large" colorIndex="ok" /> : <LinkUp size="large" colorIndex="error" />
         );
         figures.push({
           type: 'weight',
@@ -73,7 +73,7 @@ class DashboardPage extends React.Component {
         let currentCalories = bucket.pop();
         let previousCalories = bucket.pop();
         let trendIcon = (currentCalories.value > previousCalories.value) ?
-          <LinkUp size="xlarge" colorIndex="ok" /> : <LinkDown size="xlarge" colorIndex="warning" />
+          <LinkUp size="large" colorIndex="ok" /> : <LinkDown size="large" colorIndex="warning" />
         ;
         figures.push({
           type: "calories",
@@ -86,7 +86,7 @@ class DashboardPage extends React.Component {
 
     }
     return (
-      <Box>
+      <Box pad={{vertical: 'small', horizontal: 'medium'}}>
         <DocumentTitle title='Dashboard - Healthbeacon' />
         <Heading>Dashboard</Heading>
         <Section primary={true}>
@@ -101,7 +101,7 @@ class DashboardPage extends React.Component {
           />
           <Tiles flush={false} justify="center" fill={true} full="horizontal">
             {figures.map((figure) => (
-              <Tile colorIndex="light-1">
+              <Tile key={figure.type} colorIndex="light-1">
                 <Value key={figure.type} value={figure.value} units={figure.units} trendIcon={figure.trendIcon} label={figure.label} size="large" />
               </Tile>
             ))}

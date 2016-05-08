@@ -38,7 +38,7 @@ class DetailsPage extends React.Component {
       return (<Spinning />)
     }
     return (
-      <Box>
+      <Box pad={{vertical: 'small', horizontal: 'medium'}}>
         <DocumentTitle title='Details - Healthbeacon' />
         <Heading>Details</Heading>
         <Section primary={true}>

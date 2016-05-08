@@ -1,5 +1,6 @@
 import d3 from 'd3';
 import React from 'react';
+import ReactDOM from 'react-dom';
 import ReactFauxDOM from 'react-faux-dom';
 import styles from './style';
 
@@ -7,8 +8,8 @@ class SparklineChart extends React.Component {
 
   render() {
       const margin = {top: 20, right: 20, bottom: 30, left: 50}
-      const width = window.innerWidth - margin.left - margin.right; //960 - margin.left - margin.right
-      const height = 500 - margin.top - margin.bottom
+      const width =  1024 - margin.left - margin.right;
+      const height = 512 - margin.top - margin.bottom;
 
       const data = [...this.props.data]
         .sort((a, b) => (a.date - b.date));
@@ -39,11 +40,16 @@ class SparklineChart extends React.Component {
 
       const node = ReactFauxDOM.createElement('svg')
       const svg = d3.select(node)
-        .attr('width', width + margin.left + margin.right)
-        .attr('height', height + margin.top + margin.bottom)
+        .attr('width', width)
+        .attr('height', height)
         .attr('class', styles.chart)
-      .append('g')
-        .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')')
+        .attr("width", '100%')
+        .attr("height", '100%')
+        .attr('viewBox','0 0 '+(width+margin.left+margin.right)+' '+(height+margin.top+margin.bottom))
+        .attr('preserveAspectRatio','xMinYMin')
+      .append("g")
+        .attr('transform', 'translate(' + (margin.left) + ', 0)')
+
 
       svg.append('g')
         .attr('class', `${styles['chart__axis']} ${styles['chart__axis--x']}`)
