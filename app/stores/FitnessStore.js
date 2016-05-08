@@ -11,7 +11,8 @@ const FitnessStore = Reflux.createStore({
 
   fields: {
     "distance": "com.google.distance.delta",
-    "weight": "com.google.weight"
+    "weight": "com.google.weight",
+    "calories": "com.google.calories.expended",
   },
 
   /**

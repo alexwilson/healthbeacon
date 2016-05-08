@@ -16,7 +16,9 @@ module.exports = function(options) {
   options.lint = fs.existsSync(path.resolve(__dirname, '..', '.eslintrc')) && options.lint !== false;
 
   var localIdentName = options.production ? '[hash:base64]' : '[path]-[local]-[hash:base64:5]';
-  var cssLoaders = 'style!css?module&localIdentName=' + localIdentName + '!postcss?browsers=last 2 versions';
+  var postCssString = '!postcss?browsers=last 2 versions';
+  var cssLoaderConf = '?module&localIdentName='+localIdentName;
+  var cssLoaders = 'style!css'+cssLoaderConf+postCssString;
   var scssLoaders = cssLoaders + '!sass';
   var sassLoaders = scssLoaders + '?indentedSyntax=sass';
   var lessLoaders = cssLoaders + '!less';
@@ -64,6 +66,10 @@ module.exports = function(options) {
           loader: sassLoaders,
         },
         {
+          test: /.scss-global$/, // Force global loaders.
+          loader: scssLoaders.replace(cssLoaderConf, '?module=false'),
+        },
+        {
           test: /\.scss$/,
           loader: scssLoaders,
         },
@@ -89,8 +95,14 @@ module.exports = function(options) {
         },
       ],
     },
+    sassLoader: {
+      includePaths: path.join(__dirname, '../', 'node_modules')
+    },
     resolve: {
-      extensions: ['', '.js', '.sass', '.scss', '.less', '.css'],
+      extensions: ['', '.js', '.sass', '.scss-global', '.scss', '.less', '.css'],
+      alias: {
+        react: path.join(__dirname, '../', 'node_modules', 'react'),
+      },
     },
     plugins: options.production ? [
       // Important to keep React file size down

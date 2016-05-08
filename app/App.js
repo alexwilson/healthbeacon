@@ -1,12 +1,12 @@
 import React from 'react';
 import DocumentTitle from 'react-document-title';
-import Header from './components/Header';
+import GrommetHeader from './components/Header/GrommetHeader';
 
 class App extends React.Component {
   render = () => (
-    <div className="app">
+    <div className="app grommet">
       <DocumentTitle title='Healthbeacon' />
-      <Header />
+      <GrommetHeader />
       <main>{this.props.children}</main>
     </div>
   );

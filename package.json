@@ -22,6 +22,7 @@
   "dependencies": {
     "bloomfilter": "0.0.16",
     "d3": "^3.5.16",
+    "grommet": "^0.6.2",
     "hellojs": "^1.12.0",
     "isomorphic-fetch": "^2.2.1",
     "react": "^15.0.1",
@@ -30,6 +31,9 @@
     "react-faux-dom": "^2.4.0",
     "react-router": "^2.4.0",
     "reflux": "^0.4.1"
+  },
+  "peerDependencies": {
+    "react": "^15.0.1"
   },
   "devDependencies": {
     "autoprefixer": "^6.3.1",

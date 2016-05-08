@@ -7,16 +7,11 @@ class SparklineChart extends React.Component {
 
   render() {
       const margin = {top: 20, right: 20, bottom: 30, left: 50}
-      const width = 960 - margin.left - margin.right
+      const width = window.innerWidth - margin.left - margin.right; //960 - margin.left - margin.right
       const height = 500 - margin.top - margin.bottom
 
       const data = [...this.props.data]
-        .sort((a, b) => (a.date - b.date))
-        .map((datapoint) => {
-          datapoint.date = datapoint.date
-          return datapoint;
-        });
-
+        .sort((a, b) => (a.date - b.date));
       const x = d3.time.scale()
         .domain(d3.extent(data, (d) => d.date))
         .range([0, width]);

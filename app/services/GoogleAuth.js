@@ -34,6 +34,7 @@ class GoogleAuth {
 
   /**
    * Initiates a login.
+   *
    * @return {void}
    */
   login() {
@@ -42,6 +43,7 @@ class GoogleAuth {
 
   /**
    * Logs out.
+   *
    * @return {void}
    */
   logout() {
@@ -66,14 +68,6 @@ class GoogleAuth {
    */
   getToken(token) {
     return this._token;
-  };
-
-  /**
-   * [getHealth description]
-   * @return {[type]} [description]
-   */
-  getHealth() {
-    return this._hello.api('fitness/v1/users/me/dataSources');
   };
 
 }
