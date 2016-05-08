@@ -11,7 +11,7 @@ import Tile from 'grommet/components/Tile';
 import Tiles from 'grommet/components/Tiles';
 import LinkUp from 'grommet/components/icons/base/LinkUp';
 import LinkDown from 'grommet/components/icons/base/LinkDown';
-import More from 'grommet/components/icons/Status';
+import Status from 'grommet/components/icons/Status';
 
 class DashboardPage extends React.Component {
 
