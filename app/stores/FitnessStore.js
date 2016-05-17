@@ -12,7 +12,12 @@ const FitnessStore = Reflux.createStore({
   fields: {
     "distance": "com.google.distance.delta",
     "weight": "com.google.weight",
-    "calories": "com.google.calories.expended",
+    "calories": "derived:com.google.calories.expended:com.google.android.gms:merge_calories_expended",
+    "steps": "derived:com.google.step_count.delta:com.google.android.gms:estimated_steps"
+  },
+
+  activityMap: {
+    "sleep": 72
   },
 
   /**
@@ -41,9 +46,13 @@ const FitnessStore = Reflux.createStore({
     const endTime = new Date();
     endTime.setHours(24, 0, 0, 0);
 
-    const aggregateBy = Object.keys(this.fields).map((key) => ({
-      "dataTypeName": this.fields[key]
-    }));
+    const aggregateBy = Object.keys(this.fields).map((key) => (
+      this.fields[key].match(/^derived\:.*/i) !== null ? {
+        "dataSourceId": this.fields[key]
+      } : {
+        "dataTypeName": this.fields[key]
+      }
+    ));
 
     fetch('https://www.googleapis.com/fitness/v1/users/me/dataset:aggregate', {
       method: 'POST',
@@ -84,13 +93,27 @@ const FitnessStore = Reflux.createStore({
   },
 
   mapToHumanName(activityBucket) {
+    activityBucket = activityBucket.match(/^derived\:(.*)\:com.google.android.gms/i)[1];
+    if (activityBucket === 'com.google.activity.summary') {
+      throw new Error();
+    }
     return Object.keys(this.fields).reduce((previous, current) => (
-      activityBucket.indexOf(this.fields[current]) !== -1 ? current : previous
+      (activityBucket.indexOf(this.fields[current]) !== -1
+        || this.fields[current].indexOf(activityBucket) !== -1)
+      ? current : previous
     ), activityBucket);
   },
 
+  mapActivity(point) {
+    console.log(point);
+  },
+
   addPoint(activityBucket, point) {
-    activityBucket = this.mapToHumanName(activityBucket);
+    try {
+      activityBucket = this.mapToHumanName(activityBucket);
+    } catch (e) {
+      activityBucket = this.mapActivity(point);
+    }
     if (!this.state.buckets.hasOwnProperty(activityBucket)) {
       this.state.buckets[activityBucket] = new Set();
     }
@@ -98,7 +121,7 @@ const FitnessStore = Reflux.createStore({
       const date = new Date((point.startTimeNanos/1000000));
       date.setHours(date.getHours(), 0, 0, 0)
       const datapoint = {
-        value: (value.fpVal) ? +value.fpVal.toFixed(3) : 0,
+        value: (value.fpVal) ? +value.fpVal.toFixed(3) : (value.intVal) ? +value.intVal : 0,
         date: date
       };
       if (!this.bloomFilter.test(JSON.stringify(datapoint))) {

@@ -54,7 +54,7 @@ class DashboardPage extends React.Component {
         let currentWeight = bucket.pop();
         let previousWeight = bucket.pop();
         let trendIcon = (currentWeight.value === previousWeight.value) ? (
-          <Status value="warning" size="large" />
+          <Status value="warning" size="xlarge" />
         ) : (
           (currentWeight.value < previousWeight.value) ?
           <LinkDown size="large" colorIndex="ok" /> : <LinkUp size="large" colorIndex="error" />
@@ -79,7 +79,7 @@ class DashboardPage extends React.Component {
           type: "calories",
           value: currentCalories.value.toFixed(1),
           units: "kcal",
-          label: "Calories Consumed",
+          label: "Calories Spent",
           trendIcon: trendIcon
         });
       }
